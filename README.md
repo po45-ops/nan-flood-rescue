@@ -7,3 +7,5 @@ This repository contains a Next.js application and the currently playable browse
 The demo stores progress locally in the browser. Teacher authentication and classroom sync are demo-only until a Supabase project is connected. Do not represent the demo room code as secure authentication.
 
 The map is derived from OpenStreetMap. Historical extent comes from GISTDA's report for ICEYE imagery dated 25 July 2025: 22,032 rai in Mueang Nan, Phu Phiang, and Wiang Sa. The game does not include a verified georeferenced flood polygon, and simulated blue overlays are clearly identified as such.
+
+The cinematic home background and student avatar art are illustrative game assets, not historical photos, a geographic map, or a verified flood footprint. The updated interface follows the supplied visual references while preserving the existing game flow and data labels.
