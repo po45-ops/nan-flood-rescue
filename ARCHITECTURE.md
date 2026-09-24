@@ -41,3 +41,53 @@ A mission contains `mission_id`, `year`, `event_name`, dates, cause/storm, recor
 6. Connect GitHub and Vercel, publish, then verify desktop/tablet/mobile and source attribution.
 
 The above are development tasks, not capabilities claimed by the present MVP.
+
+## Gameplay upgrade audit — 3D adventure vertical slice
+
+### Reusable
+
+- Verified historical mission records and source links in `public/game/data/historical.js`.
+- `SimulationEngine` and its explicit separation between historical facts and learning simulation results.
+- MapLibre exploration, district/river layers, budget and measure definitions, local save, historical replay, learning report, and teacher demo.
+- Phaser rain cues can remain available for the legacy map flow.
+
+### Needs modification
+
+- The main path changes from briefing/quiz pages to play inside one local 3D map. Short assessment screens remain available as optional classroom material.
+- Inventory evolves from a list of purchased measures into pickup, carried items, quick slots, stock, transport, and placed world objects.
+- Quest progress is recorded from actions in the world: movement, inspection, NPC help, pickup, construction, emergency response, and survey.
+- The flood model consumes placement, timing, repairs, warnings, and community response instead of relying only on purchase choices.
+
+### Needs replacement in the primary loop
+
+- Repeated quiz popups before every placement.
+- Screen-to-screen exploration where movement is represented only by clicking map markers.
+- Flood playback that prevents the player from acting while the event runs.
+
+### New module
+
+- `adventure.js` and `adventure.css`: Three.js local world called **ชุมชนริมแม่น้ำน่าน**.
+- Third-person character controller, orbit camera, desktop/mobile controls, context actions, five NPCs, pickups, inventory, equipment centre, basic vehicle travel, build placement and field mini-game.
+- Real-time flood event with speed controls, two mission-related dynamic emergencies, continued player control, damage survey, and result handoff to the existing report flow.
+
+### Dependencies
+
+- `three@0.180.0` is pinned and its browser module is vendored for the iframe game. MapLibre, Phaser, Next.js and the existing simulation engine remain in place.
+- The prototype uses procedural low-poly geometry. A later content milestone can add optimized GLB characters, buildings, vehicles, animation clips, audio, and authored navigation meshes.
+
+### Performance risks and controls
+
+- Mobile GPU load: one renderer, capped pixel ratio, simple geometry/materials, no real-time shadows, no post-processing, limited particles.
+- Large world assets: procedural MVP first; later GLB assets require mesh/texture compression and strict budgets.
+- Flood computation: the MVP visualizes zone state and deterministic consequences. Hydrodynamic claims are prohibited until a reviewed model and verified inputs exist.
+- Input complexity: progressive disclosure, contextual action prompt, four mobile actions, and panels that open only when requested.
+
+### MVP milestones
+
+1. Playable local world, character controller, third-person camera, mobile joystick.
+2. NPC/context interaction, quest log, pickup and inventory.
+3. Equipment centre, resource costs, basic vehicle travel.
+4. Build mode, placement feedback, sandbag/pump and field mini-game.
+5. Real-time flood event, upstream-to-downstream consequence display, two dynamic emergencies.
+6. Damage survey and result handoff to historical replay/learning report.
+7. Later: authored 3D assets, audio, four connected zones, deeper transport/base progression, Supabase classrooms, multiplayer.
