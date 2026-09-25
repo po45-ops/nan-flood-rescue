@@ -1,2 +1,31 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#12384a"><meta name="description" content="เกมจำลองการจัดการน้ำท่วมจังหวัดน่านสำหรับนักเรียน ป.5 ใช้ข้อมูลประวัติศาสตร์ที่ตรวจสอบได้แยกจากผลจำลอง"><title>NAN FLOOD RESCUE • ภารกิจพิทักษ์เมืองน่าน</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="vendor/maplibre-gl.css"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="adventure.css?v=zone3-v3"></head><body><div id="app"></div><script src="data/historical.js"></script><script src="engine.js"></script><script src="vendor/phaser.min.js"></script><script src="game-scene.js"></script><script type="module">import * as maplibregl from "./vendor/maplibre-gl.mjs";import * as THREE from "./vendor/three.module.min.js";window.maplibregl=maplibregl;window.THREE=THREE;const adventure=document.createElement("script");adventure.src="adventure.js?v=zone3-v3";adventure.onload=()=>{const script=document.createElement("script");script.src="app.js";document.body.append(script)};document.body.append(adventure);</script></body></html>
+<html lang="th">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="theme-color" content="#163945"><meta name="description" content="NAN FLOOD RESCUE เกมผจญภัยสามมิติ เรียนรู้และร่วมกันป้องกันน้ำท่วมเมืองน่าน">
+ <title>NAN FLOOD RESCUE • ภารกิจพิทักษ์เมืองน่าน</title>
+ <link rel="icon" href="favicon.svg" type="image/svg+xml">
+ <link rel="stylesheet" href="vendor/maplibre-gl.css"><link rel="stylesheet" href="style.css">
+ <link rel="stylesheet" href="adventure.css?v=zone3-4"><link rel="stylesheet" href="adventure-polish.css?v=zone3-4">
+</head>
+<body>
+ <div id="app"></div>
+ <script src="data/historical.js"></script><script src="engine.js"></script>
+ <script src="vendor/phaser.min.js"></script><script src="game-scene.js"></script>
+ <script type="module">
+  import * as maplibregl from './vendor/maplibre-gl.mjs';
+  import * as THREE from './vendor/three.module.min.js';
+  window.maplibregl=maplibregl;window.THREE=THREE;
+  const load=src=>new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=resolve;script.onerror=reject;document.body.append(script)});
+  try {
+   await load('adventure.js?v=zone3-4');
+   await load('adventure-play.js?v=zone3-4');
+   await load('zone3-scene.js?v=zone3-4');
+   window.enhanceNanPlay(NanAdventureGame);window.enhanceNanScene(NanAdventureGame);
+   await load('app.js?v=zone3-4');
+  } catch(error) {
+   document.getElementById('app').innerHTML='<main style="padding:40px;font:18px Tahoma"><h1>กำลังเตรียมเกม</h1><p>โหลดไฟล์เกมไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง</p><button onclick="location.reload()">โหลดเกมอีกครั้ง</button></main>';
+   console.error('Game load failed',error);
+  }
+ </script>
+</body></html>
