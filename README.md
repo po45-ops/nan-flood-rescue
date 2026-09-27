@@ -11,3 +11,7 @@ The map is derived from OpenStreetMap. Historical extent comes from GISTDA's rep
 The cinematic home background, student avatar art, and 3D environment panorama are illustrative game assets, not historical photos, a geographic map, or a verified flood footprint. The updated interface follows the supplied visual references while preserving the existing game flow and data labels.
 
 Use [PILOT-ZONE3.md](PILOT-ZONE3.md) to conduct a small, teacher-led usability pilot before expanding the playable map. The game does not yet synchronize classroom progress between devices.
+
+## ตัวละครสามมิติพร้อมท่าทาง
+
+เปิด `/game/characters.html` เพื่อทดลองทั้ง 5 บทบาทและดาวน์โหลด GLB ดูรายละเอียดใน [CHARACTERS-3D.md](CHARACTERS-3D.md)

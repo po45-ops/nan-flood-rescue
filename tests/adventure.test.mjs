@@ -1,3 +1,4 @@
+import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import test from 'node:test';
@@ -6,10 +7,10 @@ import * as THREE from 'three';
 
 function fixture(saved={}) {
  const memory=new Map([['nan-adventure-save-v1',JSON.stringify(saved)]]);
- const sandbox={window:{THREE},performance:{now:()=>100},localStorage:{getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)},console,setTimeout,clearTimeout,devicePixelRatio:1};
+ const sandbox={window:{THREE,nanMergeGeometries:mergeGeometries},performance:{now:()=>100},localStorage:{getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)},console,setTimeout,clearTimeout,devicePixelRatio:1};
  vm.createContext(sandbox);
- for(const file of ['adventure.js','adventure-play.js','zone3-scene.js'])vm.runInContext(readFileSync(new URL('../public/game/'+file,import.meta.url),'utf8'),sandbox);
- vm.runInContext('window.enhanceNanPlay(NanAdventureGame);window.enhanceNanScene(NanAdventureGame);window.TestGame=NanAdventureGame',sandbox);
+ for(const file of ['adventure.js','adventure-play.js','zone3-scene.js','characters.js'])vm.runInContext(readFileSync(new URL('../public/game/'+file,import.meta.url),'utf8'),sandbox);
+ vm.runInContext('window.enhanceNanPlay(NanAdventureGame);window.enhanceNanScene(NanAdventureGame);window.NanCharacters.install(NanAdventureGame);window.TestGame=NanAdventureGame',sandbox);
  const game=Object.create(sandbox.window.TestGame.prototype),els=new Map();
  game.q=s=>{if(!els.has(s)){const classes=new Set();els.set(s,{textContent:'08:00',style:{},classList:{add:k=>classes.add(k),remove:k=>classes.delete(k),contains:k=>classes.has(k),toggle:k=>classes.has(k)?classes.delete(k):classes.add(k)},focus(){}})}return els.get(s)};
  Object.assign(game,{state:game.loadState(),options:{},keys:{},mobile:{x:0,y:0},scene:new THREE.Scene(),player:new THREE.Group(),vehicle:new THREE.Group(),root:{querySelectorAll:()=>[],classList:{toggle(){}}},cameraYaw:0,buildMeshes:[],interactables:[],pickups:[],labels:[],surveyMarkers:[],obstacles:[],eventSpeed:1,lastFloodSave:-1,lastFloodUI:-1,buildSelected:'sandbag',floodPlanes:[],rain:{material:{}},river:{scale:new THREE.Vector3(1,1,1),position:new THREE.Vector3()},refreshUI(){},modal(html){this.lastModal=html},closeModal(){},toast(text){this.lastToast=text},updateMiniDot(){},updateBuildPreview(){},addTextSprite(){},rand:()=>.5});
