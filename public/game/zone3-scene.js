@@ -49,15 +49,33 @@ window.enhanceNanScene=function(Game){
   const colors=[0x3f7549,0x558950,0x6b9959,0x427c4e,0x819c5b];this.leafGeometry??=new T.SphereGeometry(1,12,9);this.leafMaterials??=colors.map(c=>mat(c,{roughness:.88}));const buckets=this.leafMaterials.map(material=>new T.InstancedMesh(this.leafGeometry,material,3)),dummy=new T.Object3D(),counts=Array(colors.length).fill(0);for(let i=0;i<13;i++){const a=i*2.4,r=i?(.55+this.rand()*1.05):0,y=3.65+(i%4)*.43;dummy.position.set(Math.cos(a)*r*s,y*s,Math.sin(a)*r*s);dummy.rotation.set(this.rand()*.18,this.rand()*3,this.rand()*.18);dummy.scale.set((.78+this.rand()*.48)*s,(.72+this.rand()*.43)*s,(.82+this.rand()*.45)*s);dummy.updateMatrix();const k=i%colors.length;buckets[k].setMatrixAt(counts[k]++,dummy.matrix)}buckets.forEach((bucket,k)=>{bucket.count=counts[k];bucket.instanceMatrix.needsUpdate=true;g.add(bucket)});g.position.set(x,0,z);g.rotation.y=this.rand()*6.28;shadows(g);this.scene.add(g);this.foliage.push(g)
  };
  p.makeAvatar=function(color,opts={}){
-  const g=new T.Group(),skin=0xe5ac84,navy=0x2c4654;g.userData.legs=[];g.userData.arms=[];
-  g.add(ellipsoid(.5,.8,.32,color,0,2.0,0),rounded(.88,.96,.64,opts.vest?0xdd812f:color,0,2.03,0,.18),cyl(.16,.25,skin,0,2.93,0));
+  const g=new T.Group(),skin=0xe5ac84,navy=0x2c4654,hairColor=0x302522;g.userData.legs=[];g.userData.arms=[];
+  const torsoProfile=[[.22,1.28],[.34,1.38],[.43,1.68],[.49,2.08],[.54,2.42],[.48,2.68],[.29,2.83],[.20,2.88]].map(([r,y])=>new T.Vector2(r,y));const torso=mesh(new T.LatheGeometry(torsoProfile,24),mat(color,{roughness:.88}));torso.scale.z=.78;g.add(torso,ellipsoid(.22,.18,.2,skin,0,2.86,0));
   const head=ellipsoid(.46,.56,.43,skin,0,3.39,0);g.add(head);
-  g.add(mesh(new T.SphereGeometry(.485,20,16,0,Math.PI*2,0,Math.PI*.52),mat(0x322b29),0,3.54,-.025));
-  for(let i=0;i<5;i++){const hair=ellipsoid(.15,.15,.11,0x322b29,(i-2)*.14,3.7-Math.abs(i-1)*.028,.32);hair.rotation.z=(i-2)*.22;g.add(hair)}
-  for(const side of [-1,1]){g.add(ellipsoid(.09,.12,.065,skin,side*.45,3.38,0),ellipsoid(.09,.11,.03,0xfff8ed,side*.18,3.43,.398),ellipsoid(.043,.07,.035,0x393331,side*.175,3.425,.43),ellipsoid(.012,.022,.015,0xffffff,side*.163,3.45,.456));const brow=rounded(.17,.033,.03,0x493632,side*.18,3.60,.408,.02);brow.rotation.z=-side*.06;g.add(brow)}g.add(ellipsoid(.065,.09,.10,0xd79672,0,3.32,.425));const smile=mesh(new T.TorusGeometry(.12,.015,6,14,Math.PI*.75),mat(0x8f574a),0,3.2,.411);smile.rotation.z=Math.PI*1.1;g.add(smile);
-  if(opts.helmet){g.add(mesh(new T.SphereGeometry(.52,18,14,0,Math.PI*2,0,Math.PI*.51),mat(0xf0aa45),0,3.76,0));g.add(ellipsoid(.59,.07,.53,0xf4b658,0,3.75,.05));const badge=rounded(.19,.18,.04,0xffe7b7,0,3.96,.46,.025);g.add(badge)}
-  for(const side of [-1,1]){const leg=new T.Group();leg.position.set(side*.24,1.29,0);leg.add(capsule(.175,.67,navy,0,-.48,0),ellipsoid(.20,.20,.33,0x334146,0,-1.02,.10),box(.37,.08,.53,0x192b31,0,-1.15,.1));g.add(leg);g.userData.legs.push(leg);const arm=new T.Group();arm.position.set(side*.57,2.57,0);arm.add(capsule(.16,.7,color,0,-.40,0),ellipsoid(.15,.21,.13,skin,0,-.94,0));arm.rotation.z=side*.05;g.add(arm);g.userData.arms.push(arm)}
-  if(opts.vest){for(const side of [-1,1]){g.add(rounded(.12,.84,.065,0xf9d895,side*.30,2.06,.35,.025),rounded(.27,.28,.11,0x99562b,side*.25,1.88,.35,.04),box(.09,.83,.06,0x434d41,side*.34,2.13,-.36))}g.add(rounded(.68,.86,.35,0x475e53,0,2.12,-.46,.16),rounded(.5,.34,.12,0x66766a,0,1.94,-.67,.07),box(.06,.8,.06,0x1b3941,0,2.14,.36))}
+  const hairCap=mesh(new T.SphereGeometry(.485,24,18,0,Math.PI*2,0,Math.PI*.55),mat(hairColor,{roughness:.9}),0,3.55,-.025);g.add(hairCap);
+  for(let i=0;i<7;i++){const x=(i-3)*.12,tuft=ellipsoid(.13,.18,.13,hairColor,x,3.68-Math.abs(i-2)*.025,.22+Math.abs(x)*.2);tuft.rotation.z=(i-3)*.18;g.add(tuft)}
+  for(const side of [-1,1]){
+   g.add(ellipsoid(.09,.12,.065,skin,side*.45,3.38,0),ellipsoid(.10,.13,.035,0xfff8ed,side*.18,3.43,.386),ellipsoid(.052,.078,.035,0x393331,side*.175,3.425,.42),ellipsoid(.018,.026,.018,0xffffff,side*.16,3.455,.45));
+   const brow=rounded(.18,.045,.04,hairColor,side*.18,3.60,.405,.02);brow.rotation.z=-side*.08;g.add(brow);
+  }
+  g.add(ellipsoid(.07,.10,.10,0xd79672,0,3.32,.42));const smile=mesh(new T.TorusGeometry(.115,.018,8,18,Math.PI*.75),mat(0x8f574a),0,3.205,.405);smile.rotation.z=Math.PI*1.1;g.add(smile);
+  if(opts.helmet){const shell=mesh(new T.SphereGeometry(.52,24,16,0,Math.PI*2,0,Math.PI*.51),mat(0xf0aa45,{roughness:.48}),0,3.77,0);g.add(shell,ellipsoid(.60,.075,.54,0xf4b658,0,3.75,.035));const badge=rounded(.19,.16,.04,0xffe7b7,0,3.97,.43,.025);g.add(badge,rounded(.05,.15,.035,0xe9772c,0,3.97,.46,.012))}
+  for(const side of [-1,1]){
+   const leg=new T.Group();leg.position.set(side*.24,1.29,0);leg.add(capsule(.18,.69,navy,0,-.48,0),ellipsoid(.19,.18,.31,0x334146,0,-1.02,.10),ellipsoid(.205,.11,.35,0x182b31,0,-1.13,.13));g.add(leg);g.userData.legs.push(leg);
+   const arm=new T.Group();arm.position.set(side*.53,2.56,0);arm.add(ellipsoid(.235,.28,.25,color,0,-.11,0),capsule(.155,.67,color,0,-.46,0),ellipsoid(.155,.20,.14,skin,0,-.91,.015));
+   if(opts.vest)arm.add(rounded(.11,.24,.05,0xf7d99a,0,-.46,.142,.02));arm.rotation.z=side*.04;g.add(arm);g.userData.arms.push(arm);
+  }
+  if(opts.vest){
+   for(const side of [-1,1]){
+    g.add(rounded(.39,1.16,.18,0xdd812f,side*.20,2.08,.335,.11),rounded(.075,.82,.05,0xffe29a,side*.31,2.12,.438,.025));
+    g.add(rounded(.26,.29,.12,0xa95724,side*.19,1.91,.45,.04),rounded(.28,.08,.12,0xf0b15b,side*.19,2.08,.46,.035));
+    g.add(ellipsoid(.035,.035,.025,0xe7d4a5,side*.19,2.08,.53));
+   }
+   g.add(rounded(.08,.72,.1,0x273f43,-.32,2.08,-.32,.03),rounded(.08,.72,.1,0x273f43,.32,2.08,-.32,.03));
+   g.add(rounded(.78,.88,.58,0x405c50,0,2.10,-.40,.16),rounded(.61,.38,.18,0x617565,0,1.92,-.70,.08),rounded(.43,.30,.16,0x4d6558,0,2.38,-.68,.06));
+   g.add(rounded(.29,.37,.10,0x344c4b,-.12,2.02,-.80,.04),rounded(.29,.37,.10,0x344c4b,.12,2.02,-.80,.04));
+   g.add(rounded(.16,.23,.1,0x4c5350,-.37,2.58,.19,.03),rounded(.07,.17,.04,0xd85b3c,-.37,2.58,.26,.02));
+  }
   shadows(g);return g;
  };
  p.makeVehicle=function(){const g=new T.Group();g.add(rounded(2.55,.85,5.1,0xe38d43,0,1.04,0,.2),rounded(2.4,1.45,2.3,0xf1c88a,0,2.0,.45,.25),rounded(2.4,.6,1.5,0xe38d43,0,1.47,2,.17));g.add(rounded(2.05,.8,.08,0x5b929d,0,2.17,1.64,.10));for(const side of [-1,1]){g.add(box(.07,.85,1.75,0x557c89,side*1.25,2.12,.55),box(.08,.08,.34,0xe7dfc0,side*1.32,1.53,.28),box(.06,.15,4.4,0xf3e4b9,side*1.31,1.24,0));for(const z of [-1.65,1.65]){const wheel=cyl(.62,.42,0x263b40,side*1.28,.64,z,20);wheel.rotation.z=Math.PI/2;const rim=cyl(.31,.44,0xafc0b7,side*1.32,.64,z,16);rim.rotation.z=Math.PI/2;g.add(wheel,rim)}}g.add(rounded(2.7,.25,.30,0x536a6a,0,.83,2.62,.09),box(1,.3,.08,0x3b5155,0,1.14,2.65));for(const side of [-1,1])g.add(rounded(.50,.30,.15,0xffe3a0,side*.82,1.3,2.64,.07));g.add(rounded(1.75,.18,.47,0x48616a,0,2.88,.45,.05),rounded(.65,.20,.42,0xc55742,-.46,3.05,.45,.07),rounded(.65,.20,.42,0x599fac,.46,3.05,.45,.07),rounded(1.85,.55,1.7,0x596e61,0,1.68,-1.5,.1));shadows(g);return g};
