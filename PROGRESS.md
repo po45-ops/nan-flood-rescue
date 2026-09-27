@@ -1,13 +1,12 @@
-# Zone 3 playable UI update
+# ZONE 3 field-test readiness
 
 Continues the existing Next.js + Three.js game and `nan-adventure-save-v1` saves.
 
-- `public/game/adventure-play.js` extends the original game with the redesigned HUD, map and guided navigation, pointer joystick, building collision and reachable interaction distances, pause during dialogs, persistent pickups, mandatory-equipment budget reserve, refund and reclaim actions.
-- `public/game/zone3-scene.js` adds rounded terrain, layered roof details, improved characters and rescue truck, trees, grass, bridge decks, nearby labels and an objective marker.
-- `public/game/adventure-polish.css` styles the dimensional HUD, dialogs, equipment cards and responsive touch controls.
-- `public/game/index.html` loads the extensions before mounting the existing game.
-- `npm test` runs 10 regression tests covering preparation, equipment, flood, survey, results, saved progress, navigation and controls. `npm run check` and `npm run build` validate the application.
+- Added `public/game/assets/nan-river-panorama.png` as an illustrative Nan-river panorama composited behind the transparent 3D scene, with a CSS gradient fallback. Added procedural ground and water textures, denser instanced tree crowns, softer lighting and shadows, and adjusted the camera so the landscape reads at a lower, more game-like angle. The scene remains a stylized prototype rather than a production character/model pack.
+- Moved the toolkit and sandbag pickups outside the equipment depot collision area. Moved the school teacher and damage marker outside the school building collision area. The objective route now includes the free repair kit, and the flood cannot start until it has been collected.
+- Tested the browser route to the water station and opened its information interaction. Automated path checks cover the complete ordered route from station and depot through supplies, build area, school, and all survey points, plus the river bridges. `npm test` now runs 13 checks; `npm run check` and `npm run build` passed for the current scene update.
+- Prepared `PILOT-ZONE3.md` for two pairs of learners, including tasks, an observation sheet, curriculum links, and criteria to meet before expanding the map. A teacher still needs to arrange and conduct the learner session; no student pilot has been conducted yet.
 
-The scene is a stylized playable educational prototype; it is not a surveyed geographic reconstruction. Classroom synchronization remains demo-only as described in README.md.
+The scene remains a stylized educational prototype and is not a surveyed geographic reconstruction. The pilot is intended to identify usability problems before extending the playable area; the school should follow its own consent policy and record no student names. Classroom synchronization remains demo-only as described in README.md.
 
 Continue from these files; do not rebuild the project. Deployment remains the existing GitHub main branch connected to Vercel.

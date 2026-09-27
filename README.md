@@ -8,4 +8,6 @@ The demo stores progress locally in the browser. Teacher authentication and clas
 
 The map is derived from OpenStreetMap. Historical extent comes from GISTDA's report for ICEYE imagery dated 25 July 2025: 22,032 rai in Mueang Nan, Phu Phiang, and Wiang Sa. The game does not include a verified georeferenced flood polygon, and simulated blue overlays are clearly identified as such.
 
-The cinematic home background and student avatar art are illustrative game assets, not historical photos, a geographic map, or a verified flood footprint. The updated interface follows the supplied visual references while preserving the existing game flow and data labels.
+The cinematic home background, student avatar art, and 3D environment panorama are illustrative game assets, not historical photos, a geographic map, or a verified flood footprint. The updated interface follows the supplied visual references while preserving the existing game flow and data labels.
+
+Use [PILOT-ZONE3.md](PILOT-ZONE3.md) to conduct a small, teacher-led usability pilot before expanding the playable map. The game does not yet synchronize classroom progress between devices.
