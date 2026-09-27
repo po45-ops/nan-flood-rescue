@@ -41,6 +41,7 @@
      if(role.tool==='map'||role.tool==='tablet'||role.tool==='binoculars'){r.LeftShoulder=[-1.05,0,-.10];r.LeftElbow=[-.7,0,0];}
      if(role.tool==='binoculars'){r.LeftShoulder[0]=r.RightShoulder[0]=-1.55;r.LeftElbow[0]=r.RightElbow[0]=-.95;r.Head[0]=-.04;}
      if(role.tool==='radio'){r.RightShoulder[0]=-1.5;r.RightElbow[0]=-1.1;r.Head[1]=.07;}
+     if(role.id==='engineer'){r.LeftShoulder=[-.75,0,.62];r.LeftElbow=[-1.05,0,0];r.RightShoulder=[-.75+.025*s,0,-.27];r.RightElbow=[-1.02+.025*s,0,0];r.Head=[.23,.025*s,0];}
     }
     ys.push(0,y,0);
     for(const [key,node] of Object.entries(nodes)){const q=new T.Quaternion().setFromEuler(new T.Euler(...(r[key]||[0,0,0])));samples[key].push(q.x,q.y,q.z,q.w);}
@@ -49,7 +50,97 @@
   };
   return [make('idle',3),make('walk',.95),make('run',.62),make('wave',2),make('action',2.4)];
  }
+
+ function createEngineer({animate=true}={}){
+  const role=roles[0],g=new T.Group(),nodes={},skin=0xe5b18b,hair=0x30251f;
+  g.name='Nan_engineer';g.userData={role:'engineer',authoring:'Skinned engineer revision 2',legs:[],arms:[]};
+  const hips=joint(g,'Hips',[0,1.45,0],nodes),spine=joint(hips,'Spine',[0,0,0],nodes);
+  const profile=[[.25,-.08],[.32,.05],[.34,.40],[.40,.86],[.37,1.02],[.19,1.16]].map(v=>new T.Vector2(...v));
+  mesh(spine,new T.LatheGeometry(profile,40),role.shirt,[0,0,0],[1,1,.78]);
+  oval(hips,role.pants,[0,-.07,0],[.34,.24,.26]);round(spine,.63,.075,.43,0x353b3c,[0,0,.025],.025);round(spine,.10,.07,.025,0xb9b4a2,[0,0,.26],.01);
+  cylinder(spine,.12,.23,skin,[0,1.15,0]);
+  const head=joint(spine,'Head',[0,1.40,0],nodes);
+  const face=new T.SphereGeometry(1,48,32),pos=face.attributes.position;
+  for(let i=0;i<pos.count;i++){const y=pos.getY(i),jaw=y<-.18?1-(-y-.18)*.24:1;pos.setXYZ(i,pos.getX(i)*.40*jaw,y*.49+.13,pos.getZ(i)*.35*(y<-.1?.96:1));}face.computeVertexNormals();mesh(head,face,skin);
+  for(const side of [-1,1]){
+   oval(head,skin,[side*.386,.12,-.012],[.078,.108,.055]);oval(head,0xca9176,[side*.420,.12,.018],[.024,.054,.025]);
+   oval(head,0xfff8e8,[side*.15,.19,.311],[.088,.106,.028]);oval(head,0x6d492d,[side*.15,.184,.337],[.048,.070,.016]);oval(head,0x221d1b,[side*.15,.184,.351],[.026,.046,.009]);oval(head,0xfffaf2,[side*.139,.208,.36],[.012,.015,.005]);
+   line(head,[[side*.08,.338,.30],[side*.15,.35,.318],[side*.225,.328,.29]],.017,hair);
+  }
+  oval(head,0xdfa280,[0,.074,.339],[.046,.065,.063]);line(head,[[-.087,-.064,.314],[0,-.080,.337],[.087,-.058,.313]],.010,0x965f4f);
+  // A fitted scalp with a varying hairline, plus tapered directional locks.
+  const hp=[],hi=[],hu=[],rings=18,sectors=48;
+  for(let j=0;j<=rings;j++)for(let i=0;i<=sectors;i++){
+   const phi=i/sectors*Math.PI*2,front=Math.max(0,Math.sin(phi)),back=Math.max(0,-Math.sin(phi)),theta=j/rings*(1.60-.48*front+.30*back);
+   hp.push(-Math.cos(phi)*Math.sin(theta)*.418,.13+Math.cos(theta)*.515,Math.sin(phi)*Math.sin(theta)*.368);hu.push(i/sectors,j/rings);
+   if(j<rings&&i<sectors){const a=j*(sectors+1)+i,b=a+sectors+1;hi.push(a,b,a+1,b,b+1,a+1);}
+  }
+  const scalp=new T.BufferGeometry();scalp.setAttribute('position',new T.Float32BufferAttribute(hp,3));scalp.setAttribute('uv',new T.Float32BufferAttribute(hu,2));scalp.setIndex(hi);scalp.computeVertexNormals();mesh(head,scalp,hair);
+  function lock(points,width,color){
+   const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))),v=[],idx=[],uv=[];
+   for(let j=0;j<=18;j++){const t=j/18,c=curve.getPoint(t),tangent=curve.getTangent(t),normal=new T.Vector3(0,0,1).cross(tangent).normalize(),depth=tangent.clone().cross(normal).normalize(),r=width*Math.pow(Math.sin(Math.PI*Math.max(.02,Math.min(.98,t))),.55);
+    for(let i=0;i<=8;i++){const a=i/8*Math.PI*2,p=c.clone().addScaledVector(normal,Math.cos(a)*r).addScaledVector(depth,Math.sin(a)*r*.40);v.push(...p.toArray());uv.push(i/8,t);if(j<18&&i<8){const n=j*9+i;idx.push(n,n+9,n+1,n+9,n+10,n+1);}}
+   }const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(v,3));geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();mesh(head,geo,color);
+  }
+  for(let i=0;i<9;i++){
+   const points=[],phi=.62+i*.19;
+   for(let j=0;j<=8;j++){const theta=.20+j*.108,angle=phi-.12*(1-j/8);points.push([-Math.cos(angle)*Math.sin(theta)*.424,.13+Math.cos(theta)*.521,Math.sin(angle)*Math.sin(theta)*.374]);}
+   line(head,points,.005,i%2?0x46342a:0x211a17);
+  }
+  lock([[-.24,.47,.19],[-.15,.49,.30],[-.015,.40,.355],[.075,.31,.351]],.031,0x382920);
+  lock([[-.12,.55,.18],[-.02,.52,.30],[.13,.40,.354],[.20,.32,.321]],.029,hair);
+  for(const side of [-1,1])lock([[side*.24,.52,-.17],[side*.36,.40,-.09],[side*.38,.20,.02],[side*.35,.07,.02]],.047,hair);
+  const wrists={},skinned=[];
+  function limb(parent,child,length,radii,materials,split=.58){
+   const vertices=[],uv=[],indices=[],skinIndex=[],weights=[],radial=20,count=36;
+   for(let j=0;j<=count;j++){const t=j/count,y=-length*t,k=t*(radii.length-1),a=Math.min(radii.length-2,Math.floor(k)),f=k-a,r=T.MathUtils.lerp(radii[a],radii[a+1],f),blend=T.MathUtils.smoothstep(t,split-.14,split+.14);
+    for(let i=0;i<=radial;i++){const p=i/radial*Math.PI*2;vertices.push(Math.cos(p)*r,y,Math.sin(p)*r*.88);uv.push(i/radial,t);skinIndex.push(0,1,0,0);weights.push(1-blend,blend,0,0);if(j<count&&i<radial){const n=j*(radial+1)+i;indices.push(n,n+1,n+radial+1,n+1,n+radial+2,n+radial+1);}}
+   }
+   const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geo.setAttribute('skinIndex',new T.Uint16BufferAttribute(skinIndex,4));geo.setAttribute('skinWeight',new T.Float32BufferAttribute(weights,4));geo.setIndex(indices);geo.computeVertexNormals();
+   const splitIndex=Math.round(count*.61)*radial*6;if(materials.length===1)geo.addGroup(0,indices.length,0);else{geo.addGroup(0,splitIndex,0);geo.addGroup(splitIndex,indices.length-splitIndex,1);}
+   const m=new T.SkinnedMesh(geo,materials.map(c=>material(c)));m.castShadow=true;m.receiveShadow=true;parent.add(m);skinned.push([m,parent,child]);
+  }
+  for(const [side,name] of [[-1,'Left'],[1,'Right']]){
+   const shoulder=joint(spine,name+'Shoulder',[side*.40,.97,0],nodes),elbow=joint(shoulder,name+'Elbow',[0,-.51,0],nodes);
+   oval(shoulder,role.shirt,[0,-.035,0],[.147,.16,.130]);
+   limb(shoulder,elbow,.98,[.12,.16,.145,.118,.123,.108,.078],[role.shirt,skin],.51/.98);
+   const cuff=cylinder(elbow,.132,.095,0xd46e26,[0,-.066,0]);
+   const hand=new T.Group();hand.name=name+'Hand';hand.position.set(0,-.48,0);elbow.add(hand);wrists[name]=hand;
+   oval(hand,skin,[0,-.064,.015],[.080,.115,.065]);oval(hand,skin,[-side*.072,-.056,.047],[.037,.067,.032]);
+   for(let f=0;f<4;f++){const finger=tube(hand,.018,.067-f*.004,skin,[-.053+f*.034,-.145,.029]);finger.rotation.x=-.15;}
+   const thigh=joint(hips,name+'Hip',[side*.19,-.08,0],nodes),knee=joint(thigh,name+'Knee',[0,-.59,0],nodes);
+   limb(thigh,knee,1.16,[.163,.174,.157,.131,.135,.118,.105],[role.pants],.59/1.16);
+   round(thigh,.19,.22,.042,0x2e4355,[side*.085,-.26,.132],.02);
+   const ankle=joint(knee,name+'Ankle',[0,-.57,0],nodes);
+   oval(ankle,0x55463b,[0,-.025,.065],[.13,.135,.23]);oval(ankle,0x323c40,[0,-.117,.076],[.145,.043,.248]);oval(ankle,0x3d403c,[0,-.063,.22],[.128,.08,.102]);
+   for(let l=0;l<4;l++)line(ankle,[[-.075,.020-l*.019,.13+l*.015],[.075,.020-l*.019,.13+l*.015]],.008,0xb39970);
+  }
+  // Close-fitting vest rather than two thick chest slabs.
+  for(const side of [-1,1]){
+   round(spine,.255,.77,.065,0xe4812c,[side*.166,.52,.273],.035);round(spine,.255,.055,.018,0xd7dccf,[side*.166,.74,.321],.006);round(spine,.255,.055,.018,0xd7dccf,[side*.166,.28,.321],.006);
+   round(spine,.195,.17,.033,0xbd6224,[side*.166,.46,.323],.025);line(spine,[[side*.08,.57,.345],[side*.25,.57,.345]],.006,0xf0ad66);
+   line(spine,[[side*.25,.14,.28],[side*.30,.55,.29],[side*.31,.96,.16],[side*.29,1.02,-.17],[side*.27,.74,-.32]],.032,0x374349);
+   round(spine,.085,.055,.025,0xabb0a3,[side*.30,.70,.331],.008);
+  }
+  round(spine,.035,.70,.021,0x424747,[0,.52,.325],.007);
+  round(spine,.56,.74,.29,0x354647,[0,.55,-.39],.10);round(spine,.43,.32,.10,0x435052,[0,.30,-.57],.06);
+  line(spine,[[-.19,.46,-.631],[0,.47,-.637],[.19,.46,-.631]],.009,0x9caa9c);
+  cylinder(spine,.067,.32,0x758b8d,[.34,.37,-.35]);cylinder(spine,.049,.055,0x344e53,[.34,.56,-.35]);
+  const tape=cylinder(spine,.080,.045,0xeab845,[-.34,-.015,.19]);tape.rotation.x=Math.PI/2;
+  const tool=new T.Group();tool.name='RoleTool';wrists.Right.add(tool);tool.position.set(-.035,-.045,.071);tool.rotation.x=-.18;
+  round(tool,.29,.40,.045,0x283d47,[0,-.07,.027],.025);round(tool,.235,.315,.009,0x79aebb,[0,-.055,.056],.008);
+  for(let i=0;i<4;i++)round(tool,.16-i*.015,.009,.008,0xe2eee1,[0,.045-i*.045,.068],.003);
+  g.updateMatrixWorld(true);
+  for(const [m,a,b] of skinned){const skeleton=new T.Skeleton([a,b]);m.bind(skeleton,m.matrixWorld);}
+  g.animations=clips(nodes,role);
+  if(animate){const mixer=new T.AnimationMixer(g),actions=Object.fromEntries(g.animations.map(c=>[c.name,mixer.clipAction(c)]));let current;
+   Object.defineProperty(g,'characterAnimator',{value:{mixer,update(dt,name='idle'){const next=actions[name]||actions.idle;if(next!==current){next.reset().fadeIn(.18).play();current?.fadeOut(.18);current=next;}mixer.update(Math.min(dt,.08));},stop(){mixer.stopAllAction();mixer.uncacheRoot(g);}}});g.characterAnimator.update(0);
+  }
+  return g;
+ }
+
  function create(index=0,{animate=true}={}){
+  if(Number(index)===0)return createEngineer({animate});
   const role=roles[Math.max(0,Math.min(4,Number(index)||0))],g=new T.Group(),nodes={},skin=0xe6ae88,hair=0x30241f;
   g.name='Nan_'+role.id;g.userData={role:role.id,authoring:'Articulated concept model',legs:[],arms:[]};
   const hips=joint(g,'Hips',[0,1.45,0],nodes),spine=joint(hips,'Spine',[0,0,0],nodes);
