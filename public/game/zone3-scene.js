@@ -15,9 +15,12 @@ window.enhanceNanScene=function(Game){
   for(let i=0;i<12;i++){const angle=i/12*Math.PI*2,cloud=new T.Group();for(let j=0;j<4;j++){const puff=ellipsoid(7+j%2*3,1.5+j*.2,3.5,0xe4efdf,j*5,0,Math.sin(j)*2);puff.material= new T.MeshBasicMaterial({color:0xe6f0e6,transparent:true,opacity:.48,depthWrite:false});cloud.add(puff)}cloud.position.set(Math.cos(angle)*113,30+(i%3)*5,Math.sin(angle)*100);this.scene.add(cloud)}
  };
  p.roofGeometry=function(w,d,h){const s=new T.Shape();s.moveTo(-w/2,0);s.lineTo(0,h);s.lineTo(w/2,0);s.closePath();const geo=new T.ExtrudeGeometry(s,{depth:d,bevelEnabled:false,steps:1});geo.translate(0,0,-d/2);geo.computeVertexNormals();return geo};
+ p.createPlasterTexture=function(){const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,256,256);let seed=0x4e414e;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};for(let i=0;i<1800;i++){const v=rnd()>.5?80:150;ctx.fillStyle=`rgba(${v},${v},${v},${.015+rnd()*.035})`;ctx.beginPath();ctx.arc(rnd()*256,rnd()*256,.4+rnd()*1.5,0,Math.PI*2);ctx.fill()}const t=new T.CanvasTexture(canvas);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,1.5);t.anisotropy=4;return t};
+ p.createRoofTexture=function(){const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,256,256);for(let row=0;row<16;row++){const y=row*16,offset=row%2?16:0;ctx.strokeStyle='rgba(67,35,29,.23)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(256,y);ctx.stroke();for(let x=-32+offset;x<288;x+=32){ctx.fillStyle='rgba(255,255,255,.11)';ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+16,y+3,x+32,y);ctx.lineTo(x+30,y+13);ctx.quadraticCurveTo(x+16,y+18,x+2,y+13);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(91,46,35,.17)';ctx.lineWidth=.8;ctx.stroke()}}const t=new T.CanvasTexture(canvas);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);t.anisotropy=4;return t};
  p.addBuilding=function(x,z,w,d,color,label,icon){
   const g=new T.Group(),roofColor=label.includes('โรงเรียน')?0x827c62:label.includes('โรงพยาบาล')?0x477078:0x9c5841;g.userData.footprint={w,d};
-  g.add(rounded(w+.6,.42,d+.6,0xb6a58c,0,.21),box(w,4.2,d,0xe4d7b5,0,2.5),box(w+.12,.28,d+.12,0xa78456,0,.72));
+  const withTextures=typeof document!=='undefined';if(withTextures){this.plasterTexture??=this.createPlasterTexture();this.roofTexture??=this.createRoofTexture()}const facade=box(w,4.2,d,0xe4d7b5,0,2.5);if(withTextures){facade.material.map=this.plasterTexture;facade.material.needsUpdate=true}
+  g.add(rounded(w+.6,.42,d+.6,0xb6a58c,0,.21),facade,box(w+.12,.28,d+.12,0xa78456,0,.72));
   for(const side of [-1,1]){
    const front=side*d/2;for(let dx=-w/2+1.6;dx<w/2-1;dx+=2.6){g.add(box(1.55,1.7,.14,0x5d503e,dx,2.85,front+side*.08),box(1.25,1.4,.17,0x70a7aa,dx,2.85,front+side*.17),box(.06,1.44,.2,0xf0dfb1,dx,2.85,front+side*.2),box(1.27,.07,.2,0xf0dfb1,dx,2.85,front+side*.2))}
    g.add(box(1.5,2.6,.18,0x614936,0,1.93,front+side*.2),box(1.07,.6,.2,0x8caeb2,0,2.37,front+side*.3));
@@ -25,7 +28,7 @@ window.enhanceNanScene=function(Game){
    for(const dx of [-w/2+.25,w/2-.25])g.add(cyl(.13,4.3,0x795438,dx,2.55,front+side*.28,8));
    for(let stair=0;stair<3;stair++)g.add(box(2.5,.17,1.3-stair*.25,0xc4b899,0,.09+stair*.17,front+side*.65));
   }
-  const roof=mesh(this.roofGeometry(w+1.8,d+1.8,2.5),mat(roofColor,{roughness:.93}),0,4.6,0);g.add(roof);
+  const roofMat=mat(roofColor,{...(withTextures?{map:this.roofTexture}:{}),roughness:.93}),roof=mesh(this.roofGeometry(w+1.8,d+1.8,2.5),roofMat,0,4.6,0);g.add(roof);
   for(let zz=-d/2-.8;zz<=d/2+.8;zz+=.65){for(const side of [-1,1]){const beam=box(Math.hypot((w+1.8)/2,2.5),.055,.08,roofColor===0x9c5841?0xb76e4e:roofColor,side*(w+1.8)/4,5.88,zz);beam.rotation.z=-side*Math.atan2(2.5,(w+1.8)/2);g.add(beam)}}
   const ridge=cyl(.11,d+2.1,0xd7ad72,0,7.18,0,10);ridge.rotation.x=Math.PI/2;g.add(ridge);
   if(label.includes('ศูนย์อุปกรณ์')){g.add(box(w-2,.45,2.6,0x586d64,0,3.65,d/2+1.2));for(const dx of [-w/2+1.2,w/2-1.2])g.add(cyl(.1,3.2,0x576459,dx,1.6,d/2+2.2,8));for(let i=0;i<3;i++)g.add(rounded(1.2,.8,1,0xa28053,w/2+1.4,.4,(i-1)*1.4));}
